@@ -3,3 +3,5 @@ flask==3.0.0
 openai-whisper==20231117
 torch==2.1.2
 werkzeug==3.0.1
+pydub==0.25.1
+ffmpeg-python==0.2.0

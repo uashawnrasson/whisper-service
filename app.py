@@ -2,6 +2,7 @@ import os
 import whisper
 from flask import Flask, request, jsonify
 from werkzeug.utils import secure_filename
+from pydub import AudioSegment
 
 app = Flask(__name__)
 
@@ -39,11 +40,20 @@ def transcribe_audio():
         file.save(filepath)
         
         try:
-            # Transcribe the audio file
-            result = model.transcribe(filepath)
+            # Convert to mono
+            audio = AudioSegment.from_file(filepath)
+            audio = audio.set_channels(1)  # Convert to mono
+            mono_filepath = os.path.join(app.config['UPLOAD_FOLDER'], 'mono_' + os.path.splitext(filename)[0] + '.wav')
+            audio.export(mono_filepath, format='wav')
             
-            # Clean up the uploaded file
+            # Remove the original file
             os.remove(filepath)
+            
+            # Transcribe the mono audio file
+            result = model.transcribe(mono_filepath)
+            
+            # Clean up the mono file
+            os.remove(mono_filepath)
             
             # Return the transcription
             return jsonify({
@@ -53,9 +63,11 @@ def transcribe_audio():
             })
             
         except Exception as e:
-            # Clean up the uploaded file in case of error
+            # Clean up files in case of error
             if os.path.exists(filepath):
                 os.remove(filepath)
+            if os.path.exists(mono_filepath):
+                os.remove(mono_filepath)
             return jsonify({'error': str(e)}), 500
     
     return jsonify({'error': 'Invalid file type'}), 400
