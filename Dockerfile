@@ -1,8 +1,7 @@
-FROM nvidia/cuda:12.1.0-base-ubuntu22.04
+FROM python:3.11-slim
 
-# Install Python and dependencies
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    python3-pip \
     ffmpeg \
     git \
     && rm -rf /var/lib/apt/lists/*

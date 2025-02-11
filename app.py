@@ -1,5 +1,6 @@
 import os
 import whisper
+import torch
 from flask import Flask, request, jsonify
 from werkzeug.utils import secure_filename
 from pydub import AudioSegment
@@ -16,7 +17,9 @@ if not os.path.exists(UPLOAD_FOLDER):
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Initialize Whisper model
-model = whisper.load_model("base")
+device = "cpu"
+model = whisper.load_model("tiny")  # Using tiny model for faster processing
+model.to(device)
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
